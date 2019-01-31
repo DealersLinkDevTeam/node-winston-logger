@@ -59,7 +59,7 @@ class Logger {
         host: config.logstash.host,
         appName: config.logstash.appName,
         level: 'info',
-        format: winston.format.combine(winston.format.json(), winston.format.logstash())
+        format: winston.format.logstash()
       }));
     }
 
