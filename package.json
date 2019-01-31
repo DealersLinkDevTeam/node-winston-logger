@@ -1,6 +1,6 @@
 {
   "name": "@dealerslink/node-winston-logger",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A wrapper for npm module Winston",
   "main": "index.js",
   "scripts": {
@@ -27,6 +27,6 @@
     "gulp-prettier": "^2.0.0",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
-    "prettier": "^1.16.1"
+    "prettier": "^1.16.3"
   }
 }
