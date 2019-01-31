@@ -15,7 +15,13 @@ const LogstashUDP = require('winston-logstash-udp').LogstashUDP;
  */
 class Logger {
   constructor(config) {
-    this.logDir = config.logging.logDir || './logs';
+    config = config || {};
+    const defaultLogging = {
+      logDir: './logs',
+      options: {}
+    };
+    this.loggingConfig = __.assign({}, defaultLogging, config.logging || {});
+    this.logDir = this.loggingConfig .logDir || './logs';
 
     const transports = [
       new winston.transports.File({
@@ -69,13 +75,13 @@ class Logger {
     };
 
     // Create log folder if it does not already exist
-    if (!fs.existsSync(config.logging.logDir)) {
+    if (!fs.existsSync(this.loggingConfig.logDir)) {
       console.log('Creating log folder');
-      fs.mkdirSync(config.logging.logDir);
+      fs.mkdirSync(this.loggingConfig.logDir);
     }
 
     // Merge options from config into this object
-    this.option = __.assign(this.options, config.logging.options);
+    this.option = __.assign(this.options, this.loggingConfig.options);
     this.log = winston.createLogger(this.options);
 
     // Mixin to replacement to strip empty logs in debug and error
@@ -98,7 +104,11 @@ class Logger {
   }
 
   formatter(options) {
-    return `${new Date().toISOString()} [${options.level.toUpperCase()}]: ${options.message}`;
+    let message = options.message;
+    if (!message) {
+      message = JSON.parse(options[Symbol.for('message')])['@message'];
+    }
+    return `${new Date().toISOString()} [${options.level.toUpperCase()}]: ${message}`;
   }
 
   jsonformatter(options) {
