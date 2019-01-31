@@ -1,6 +1,6 @@
 {
   "name": "@dealerslink/node-winston-logger",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A wrapper for npm module Winston",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@dealerslink/lodash-extended": "^1.1.1",
     "winston": "^3.2.1",
-    "winston-logstash-udp": "^0.2.1"
+    "winston3-logstash-udp": "0.0.7"
   },
   "devDependencies": {
     "chai": "^4.2.0",

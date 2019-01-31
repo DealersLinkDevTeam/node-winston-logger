@@ -4,7 +4,7 @@
 const __ = require('@dealerslink/lodash-extended');
 const fs = require('fs');
 const winston = require('winston');
-const LogstashUDP = require('winston-logstash-udp').LogstashUDP;
+const LogstashUDP = require('winston3-logstash-udp').LogstashUDP;
 
 /**
  * A utility class to wrap Winston logging
@@ -58,8 +58,6 @@ class Logger {
         port: config.logstash.port,
         host: config.logstash.host,
         appName: config.logstash.appName,
-        json: true,
-        logstash: true,
         level: 'info',
         format: winston.format.combine(winston.format.json(), winston.format.logstash())
       }));
