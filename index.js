@@ -61,17 +61,17 @@ class Logger {
         json: true,
         logstash: true,
         level: 'info',
-        format: winston.format.printf(this.jsonformatter),
+        format: winston.format.logstash(),
         formatter: this.jsonformatter
       }));
     }
 
     this.options = {
+      // json: true,
+      // logstash: true,
+      // format: winston.format.combine(winston.format.printf(this.jsonformatter), winston.format.logstash()),
       exitOnError: false,
-      transports: transports,
-      format: winston.format.combine(winston.format.printf(this.jsonformatter), winston.format.logstash()),
-      json: true,
-      logstash: true
+      transports: transports
     };
 
     // Create log folder if it does not already exist
