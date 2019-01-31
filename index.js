@@ -55,14 +55,15 @@ class Logger {
         json: true,
         logstash: true,
         level: 'info',
-        format: winston.format.printf(this.jsonformatter)
+        format: winston.format.printf(this.jsonformatter),
+        formatter: this.jsonformatter
       }));
     }
 
     this.options = {
       exitOnError: false,
       transports: transports,
-      format: winston.format.printf(this.formatter),
+      format: winston.format.combine(winston.format.printf(this.jsonformatter), winston.format.logstash()),
       json: true,
       logstash: true
     };
