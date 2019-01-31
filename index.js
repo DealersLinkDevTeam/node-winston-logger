@@ -55,7 +55,7 @@ class Logger {
         json: true,
         logstash: true,
         level: 'info',
-        format: winston.format.json()
+        format: winston.format.printf(this.jsonformatter);
       }));
     }
 
@@ -98,6 +98,21 @@ class Logger {
 
   formatter(options) {
     return `${new Date().toISOString()} [${options.level.toUpperCase()}]: ${options.message}`;
+  }
+
+  jsonformatter(options) {
+    const date = new Date().toISOString();
+    const obj = {
+      date: date,
+      level: options.level.toUpperCase()
+    };
+    // Merge message if it is an object -- otherwise add message property
+    if (typeof options.message === 'object') {
+      __.merge(obj, object.message);
+    } else {
+      obj.message = options.message;
+    }
+    return JSON.stringify(obj);
   }
 
   handleError(err) {
