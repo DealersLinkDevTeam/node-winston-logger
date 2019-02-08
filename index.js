@@ -3,8 +3,9 @@
 // Dependencies
 const __ = require('@dealerslink/lodash-extended');
 const fs = require('fs');
-const winston = require('winston');
 const LogstashUDP = require('winston3-logstash-udp').LogstashUDP;
+const winston = require('winston');
+const { format } = winston;
 
 /**
  * A utility class to wrap Winston logging
@@ -23,34 +24,45 @@ class Logger {
     this.loggingConfig = __.assign({}, defaultLogging, config.logging || {});
     this.logDir = this.loggingConfig .logDir || './logs';
 
-    const transports = [
-      new winston.transports.File({
-        filename: `${this.logDir}/info.log`,
-        name: 'info-log',
-        level: 'info',
-        format: winston.format.printf(this.formatter)
-      }),
-      new winston.transports.File({
-        filename: `${this.logDir}/error.log`,
-        name: 'error-log',
-        level: 'error',
-        format: winston.format.printf(this.formatter)
-      })
-    ];
+    const transports = [];
+    const frmt = format((info) => {
+      const msg = {};
+      if (info.message) {
+        msg['@message'] = info.message;
+      }
+      if (info.timestamp) {
+        msg['@timestamp'] = info.timestamp;
+      }
+      msg['@fields'] = info;
+      return JSON.stringify(info);
+    });
 
     // Optimization -- Add console logging and debug file if not in production
     if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
       transports.push(new winston.transports.Console({
         level: 'debug',
-        format: winston.format.printf(this.formatter)
+        format: format.printf(this.formatter)
       }));
       transports.push(new winston.transports.File({
         filename: `${this.logDir}/debug.log`,
         name: 'debug-log',
         level: 'debug',
-        format: winston.format.printf(this.formatter)
+        format: format.printf(this.formatter)
       }));
     }
+
+    transports.push(new winston.transports.File({
+      filename: `${this.logDir}/info.log`,
+      name: 'info-log',
+      level: 'info',
+      format: format.printf(this.formatter)
+    }));
+    transports.push(new winston.transports.File({
+      filename: `${this.logDir}/error.log`,
+      name: 'error-log',
+      level: 'error',
+      format: format.printf(this.formatter)
+    }));
 
     // Add logstash logging when it has an included configuration
     if (config.logstash) {
@@ -59,14 +71,12 @@ class Logger {
         host: config.logstash.host,
         appName: config.logstash.appName,
         level: 'info',
-        format: winston.format.logstash()
+        json: true,
+        logstash: true
       }));
     }
 
     this.options = {
-      // json: true,
-      // logstash: true,
-      // format: winston.format.combine(winston.format.printf(this.jsonformatter), winston.format.logstash()),
       exitOnError: false,
       transports: transports
     };
@@ -82,15 +92,27 @@ class Logger {
     this.log = winston.createLogger(this.options);
 
     // Mixin to replacement to strip empty logs in debug and error
+    this.log.oldSilly = this.log.silly;
+    this.log.oldInfo = this.log.info;
     this.log.oldDebug = this.log.debug;
     this.log.oldError = this.log.error;
     this.log.genLog = ((replaceFn, ...params) => {
       if (typeof params[0] !== 'string') {
-        params[0] = JSON.stringify(params[0]);
+        if (params[0] instanceof Error) {
+          params[0] = JSON.stringify(params[0], Object.getOwnPropertyNames(params[0]));
+        } else {
+          params[0] = JSON.stringify(params[0]);
+        }
       }
       if (params[0] !== '{}' && params[0] !== '') {
         replaceFn(...params);
       }
+    });
+    this.log.silly = ((...params) => {
+      this.log.genLog(this.log.oldSilly, ...params);
+    });
+    this.log.info = ((...params) => {
+      this.log.genLog(this.log.oldInfo, ...params);
     });
     this.log.debug = ((...params) => {
       this.log.genLog(this.log.oldDebug, ...params);
@@ -108,20 +130,17 @@ class Logger {
     return `${new Date().toISOString()} [${options.level.toUpperCase()}]: ${message}`;
   }
 
-  // jsonformatter(options) {
-  //   const date = new Date().toISOString();
-  //   const obj = {
-  //     date: date,
-  //     level: options.level.toUpperCase()
-  //   };
-  //   // Merge message if it is an object -- otherwise add message property
-  //   if (typeof options.message === 'object') {
-  //     __.merge(obj, object.message);
-  //   } else {
-  //     obj.message = options.message;
-  //   }
-  //   return JSON.stringify(obj);
-  // }
+  logstashFormatter(options) {
+    let message = options.message;
+    if (!message) {
+      message = JSON.parse(options[Symbol.for('message')])['@message'];
+    }
+    const out = {};
+    out['@message'] = message;
+    out['@timestamp'] = new Date().toISOString();
+    out['@fields'] = options;
+    return JSON.stringify(out);
+  }
 
   handleError(err) {
     if (this.log) {

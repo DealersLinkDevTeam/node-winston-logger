@@ -5,8 +5,15 @@ const chai = require('chai');
 const expect = chai.expect;
 const Logger = require('../');
 
+class WeirdError extends Error {
+  constructor(message) {
+    super(message);
+  }
+}
+
 describe('Logger Wrapper', () => {
   let logger;
+  let log;
 
   before(async() => {
     const config = {
@@ -22,11 +29,12 @@ describe('Logger Wrapper', () => {
       },
       logstash: {
         host: 'localhost',
-        port: 5000,
+        port: 8125,
         appName: 'test'
       }
     };
     logger = await new Logger(config);
+    log = logger.log;
   });
 
   it('constructor', () => {
@@ -34,6 +42,26 @@ describe('Logger Wrapper', () => {
   });
 
   it('log functions', () => {
-    expect(logger.log.log).to.be.a('function');
+    expect(log.log).to.be.a('function');
+  });
+
+  it('send blank', () => {
+    log.error('');
+  });
+
+  it('send text', () => {
+    log.error('Test Error');
+  });
+
+  it('send object', () => {
+    log.error({ garbage: 'Test Error'});
+  });
+
+  it('send error', () => {
+    try {
+      throw new WeirdError('Something went wrong.');
+    } catch(err) {
+      log.error(err);
+    }
   });
 });
