@@ -1,6 +1,6 @@
 {
   "name": "@dealerslink/node-winston-logger",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A wrapper for npm module Winston",
   "main": "index.js",
   "scripts": {
@@ -20,13 +20,13 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "codacy-coverage": "^3.4.0",
-    "eslint": "^5.12.1",
+    "eslint": "^5.13.0",
     "gulp": "^4.0.0",
     "gulp-eslint": "^5.0.0",
     "gulp-mocha": "^6.0.0",
-    "gulp-prettier": "^2.0.0",
+    "gulp-prettier": "^2.1.0",
     "mocha": "^5.2.0",
-    "nyc": "^13.1.0",
-    "prettier": "^1.16.3"
+    "nyc": "^13.2.0",
+    "prettier": "^1.16.4"
   }
 }
