@@ -72,7 +72,8 @@ class Logger {
         appName: config.logstash.appName,
         level: 'info',
         json: true,
-        logstash: true
+        logstash: true,
+        meta: false
       }));
     }
 
