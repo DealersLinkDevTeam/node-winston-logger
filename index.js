@@ -66,17 +66,17 @@ class Logger {
 
     this.options = {
       exitOnError: false,
-      transports: transports
+      transports: transports.slice(0)
     };
 
     this.sqlOptions = {
       exitOnError: false,
-      transports: transports
+      transports: transports.slice(0)
     };
 
     this.requestOptions = {
       exitOnError: false,
-      transports: transports
+      transports: transports.slice(0)
     };
 
     // Add logstash logging when it has an included configuration
@@ -134,11 +134,13 @@ class Logger {
     this.loggers.add('sql', this.sqlOptions);
     this.loggers.add('requests', this.requestOptions);
     this.log = this.loggers.get('default');
+    this.sqlLog = this.loggers.get('sql');
+    this.requestsLog = this.loggers.get('requests');
 
     // Mixin to replacement to strip empty logs in debug and error
     this.addBetterLoggingMixins(this.log);
-    this.addBetterLoggingMixins(this.loggers.get('sql'))
-    this.addBetterLoggingMixins(this.loggers.get('requests'))
+    this.addBetterLoggingMixins(this.sqlLog);
+    this.addBetterLoggingMixins(this.requestsLog);
   }
 
   // Adds Mixin replacement to strip logs which contain empty string or objects
