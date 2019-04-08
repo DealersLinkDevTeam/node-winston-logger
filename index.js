@@ -1,9 +1,9 @@
 // index.js
 
 // Dependencies
-const __ = require('@dealerslink/lodash-extended');
 const fs = require('fs');
-const LogstashUDP = require('winston3-logstash-udp').LogstashUDP;
+const __ = require('@dealerslink/lodash-extended');
+const LogstashUDP = require('@dealerslink/winston-logstash-udp').LogstashUDP;
 const winston = require('winston');
 const { format } = winston;
 
