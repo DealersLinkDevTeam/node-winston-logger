@@ -98,7 +98,7 @@ class Logger {
         port: config.logstashSQL.port,
         host: config.logstashSQL.host,
         appName: config.logstashSQL.appName,
-        level: 'info',
+        level: 'error',
         json: true,
         logstash: true,
         meta: false
@@ -111,7 +111,7 @@ class Logger {
         port: config.logstashRequests.port,
         host: config.logstashRequests.host,
         appName: config.logstashRequests.appName,
-        level: 'info',
+        level: 'error',
         json: true,
         logstash: true,
         meta: false
@@ -127,6 +127,7 @@ class Logger {
     // Merge options from config into this object
     this.option = __.assign(this.options, this.loggingConfig.options);
     this.sqlOptions = __.assign(this.sqlOptions, this.loggingConfig.options);
+    this.requestOptions = __.assign(this.requestOptions, this.loggingConfig.options);
     // this.log = winston.createLogger(this.options);
 
     this.loggers = new winston.Container();
