@@ -64,9 +64,19 @@ class Logger {
       format: format.printf(this.formatter)
     }));
 
+    this.options = {
+      exitOnError: false,
+      transports: transports
+    };
+
+    this.sqlOptions = {
+      exitOnError: false,
+      transports: transports
+    };
+
     // Add logstash logging when it has an included configuration
     if (config.logstash) {
-      transports.push(new LogstashUDP({
+      this.options.transports.push(new LogstashUDP({
         port: config.logstash.port,
         host: config.logstash.host,
         appName: config.logstash.appName,
@@ -77,10 +87,18 @@ class Logger {
       }));
     }
 
-    this.options = {
-      exitOnError: false,
-      transports: transports
-    };
+    // Add logstash logging for SQL Logger when it has an included configuration
+    if (config.logstashSQL) {
+      this.sqlOptions.transports.push(new LogstashUDP({
+        port: config.logstashSQL.port,
+        host: config.logstashSQL.host,
+        appName: config.logstashSQL.appName,
+        level: 'info',
+        json: true,
+        logstash: true,
+        meta: false
+      }));
+    }
 
     // Create log folder if it does not already exist
     if (!fs.existsSync(this.loggingConfig.logDir)) {
@@ -90,14 +108,27 @@ class Logger {
 
     // Merge options from config into this object
     this.option = __.assign(this.options, this.loggingConfig.options);
-    this.log = winston.createLogger(this.options);
+    this.sqlOptions = __.assign(this.sqlOptions, this.loggingConfig.options);
+    // this.log = winston.createLogger(this.options);
+
+    this.loggers = new winston.Container();
+    this.loggers.add('default', this.options);
+    this.loggers.add('sql', this.sqlOptions);
+    this.log = this.loggers.get('default');
 
     // Mixin to replacement to strip empty logs in debug and error
-    this.log.oldSilly = this.log.silly;
-    this.log.oldInfo = this.log.info;
-    this.log.oldDebug = this.log.debug;
-    this.log.oldError = this.log.error;
-    this.log.genLog = ((replaceFn, ...params) => {
+    this.addBetterLoggingMixins(this.log);
+    this.addBetterLoggingMixins(this.loggers.get('sql'))
+  }
+
+  // Adds Mixin replacement to strip logs which contain empty string or objects
+  addBetterLoggingMixins(log) {
+    log.oldSilly = log.silly;
+    log.oldInfo = log.info;
+    log.oldDebug = log.debug;
+    log.oldWarn = log.warn;
+    log.oldError = log.error;
+    log.genLog = ((replaceFn, ...params) => {
       if (typeof params[0] !== 'string') {
         if (params[0] instanceof Error) {
           params[0] = JSON.stringify(params[0], Object.getOwnPropertyNames(params[0]));
@@ -109,17 +140,20 @@ class Logger {
         replaceFn(...params);
       }
     });
-    this.log.silly = ((...params) => {
-      this.log.genLog(this.log.oldSilly, ...params);
+    log.silly = ((...params) => {
+      log.genLog(log.oldSilly, ...params);
     });
-    this.log.info = ((...params) => {
-      this.log.genLog(this.log.oldInfo, ...params);
+    log.info = ((...params) => {
+      log.genLog(log.oldInfo, ...params);
     });
-    this.log.debug = ((...params) => {
-      this.log.genLog(this.log.oldDebug, ...params);
+    log.debug = ((...params) => {
+      log.genLog(log.oldDebug, ...params);
     });
-    this.log.error = ((...params) => {
-      this.log.genLog(this.log.oldError, ...params);
+    log.warn = ((...params) => {
+      log.genLog(log.oldWarn, ...params);
+    });
+    log.error = ((...params) => {
+      log.genLog(log.oldError, ...params);
     });
   }
 
