@@ -98,7 +98,7 @@ class Logger {
         port: config.logstashSQL.port,
         host: config.logstashSQL.host,
         appName: config.logstashSQL.appName,
-        level: 'error',
+        level: 'debug',
         json: true,
         logstash: true,
         meta: false
@@ -111,7 +111,7 @@ class Logger {
         port: config.logstashRequests.port,
         host: config.logstashRequests.host,
         appName: config.logstashRequests.appName,
-        level: 'error',
+        level: 'debug',
         json: true,
         logstash: true,
         meta: false
