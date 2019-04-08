@@ -29,12 +29,17 @@ describe('Logger Wrapper', () => {
       },
       logstash: {
         host: 'localhost',
-        port: 8125,
+        port: 5025,
+        appName: 'test'
+      },
+      logstashRequests: {
+        host: 'localhost',
+        port: 5000,
         appName: 'test'
       },
       logstashSQL: {
         host: 'localhost',
-        port: 8125,
+        port: 5100,
         appName: 'test'
       }
     };
