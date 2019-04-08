@@ -31,6 +31,11 @@ describe('Logger Wrapper', () => {
         host: 'localhost',
         port: 8125,
         appName: 'test'
+      },
+      logstashSQL: {
+        host: 'localhost',
+        port: 8125,
+        appName: 'test'
       }
     };
     logger = await new Logger(config);
@@ -41,11 +46,21 @@ describe('Logger Wrapper', () => {
     expect(logger).to.be.instanceof(Logger);
   });
 
+  it('check loggers container', () => {
+    expect(logger.loggers.get('default')).to.not.equal(null);
+    expect(logger.loggers.get('sql')).to.not.equal(null);
+  });
+
   it('log functions', () => {
     expect(log.log).to.be.a('function');
+    expect(logger.loggers.get('sql').log).to.be.a('function');
   });
 
   it('send blank', () => {
+    log.silly('');
+    log.debug('');
+    log.info('');
+    log.warn('');
     log.error('');
   });
 
