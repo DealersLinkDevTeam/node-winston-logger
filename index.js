@@ -74,6 +74,11 @@ class Logger {
       transports: transports
     };
 
+    this.requestOptions = {
+      exitOnError: false,
+      transports: transports
+    };
+
     // Add logstash logging when it has an included configuration
     if (config.logstash) {
       this.options.transports.push(new LogstashUDP({
@@ -100,6 +105,19 @@ class Logger {
       }));
     }
 
+    // Add logstash logging for SQL Logger when it has an included configuration
+    if (config.logstashRequests) {
+      this.requestOptions.transports.push(new LogstashUDP({
+        port: config.logstashRequests.port,
+        host: config.logstashRequests.host,
+        appName: config.logstashRequests.appName,
+        level: 'info',
+        json: true,
+        logstash: true,
+        meta: false
+      }));
+    }
+
     // Create log folder if it does not already exist
     if (!fs.existsSync(this.loggingConfig.logDir)) {
       console.log('Creating log folder');
@@ -114,11 +132,13 @@ class Logger {
     this.loggers = new winston.Container();
     this.loggers.add('default', this.options);
     this.loggers.add('sql', this.sqlOptions);
+    this.loggers.add('requests', this.requestOptions);
     this.log = this.loggers.get('default');
 
     // Mixin to replacement to strip empty logs in debug and error
     this.addBetterLoggingMixins(this.log);
     this.addBetterLoggingMixins(this.loggers.get('sql'))
+    this.addBetterLoggingMixins(this.loggers.get('requests'))
   }
 
   // Adds Mixin replacement to strip logs which contain empty string or objects
