@@ -30,17 +30,20 @@ describe('Logger Wrapper', () => {
       logstash: {
         host: 'localhost',
         port: 5025,
-        appName: 'test'
+        appName: 'test',
+        mode: 'udp4'
       },
       logstashRequests: {
         host: 'localhost',
-        port: 5000,
-        appName: 'test'
+        port: 5075,
+        appName: 'test',
+        mode: 'tcp4'
       },
       logstashSQL: {
         host: 'localhost',
         port: 5100,
-        appName: 'test'
+        appName: 'test',
+        mode: 'tcp4'        
       }
     };
     logger = await new Logger(config);

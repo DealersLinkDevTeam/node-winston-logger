@@ -89,7 +89,7 @@ class Logger {
         port: config.logstash.port,
         host: config.logstash.host,
         appName: config.logstash.appName,
-        mode: 'udp4',
+        mode: config.logstash.mode,
         level: 'info',
         json: true,
         logstash: true,
@@ -103,7 +103,7 @@ class Logger {
         port: config.logstashSQL.port,
         host: config.logstashSQL.host,
         appName: config.logstashSQL.appName,
-        mode: 'tcp4',
+        mode: config.logstashSQL.mode,
         trailingLineFeed: true,
         level: 'debug',
         json: true,
@@ -118,7 +118,7 @@ class Logger {
         port: config.logstashRequests.port,
         host: config.logstashRequests.host,
         appName: config.logstashRequests.appName,
-        mode: 'tcp4',
+        mode: config.logstashRequests.mode,
         trailingLineFeed: true,
         level: 'debug',
         json: true,
@@ -161,15 +161,18 @@ class Logger {
     log.oldWarn = log.warn;
     log.oldError = log.error;
     log.genLog = ((replaceFn, ...params) => {
-      if (typeof params[0] !== 'string') {
-        if (params[0] instanceof Error) {
-          params[0] = JSON.stringify(params[0], Object.getOwnPropertyNames(params[0]));
-        } else {
-          params[0] = JSON.stringify(params[0]);
+      if (params[0]) {
+        const data = Object.assign({}, params[0]);
+        if (typeof params[0] !== 'string') {
+          if (params[0] instanceof Error) {
+            params[0] = JSON.stringify(params[0], Object.getOwnPropertyNames(params[0]));
+          } else {
+            params[0] = JSON.stringify(params[0]);
+          }
         }
-      }
-      if (params[0] !== '{}' && params[0] !== '') {
-        replaceFn(...params);
+        if (data !== '{}' && data !== '') {
+          replaceFn(...params);
+        }
       }
     });
     log.silly = ((...params) => {
