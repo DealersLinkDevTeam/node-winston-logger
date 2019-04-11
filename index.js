@@ -3,9 +3,9 @@
 // Dependencies
 const fs = require('fs');
 const __ = require('@dealerslink/lodash-extended');
-const LogstashUDP = require('@dealerslink/winston-logstash-udp').LogstashUDP;
 const winston = require('winston');
 const { format } = winston;
+const LogstashTransport = require('./lib/logstashTransport');
 
 /**
  * A utility class to wrap Winston logging
@@ -81,10 +81,11 @@ class Logger {
 
     // Add logstash logging when it has an included configuration
     if (config.logstash) {
-      this.options.transports.push(new LogstashUDP({
+      this.options.transports.push(new LogstashTransport({
         port: config.logstash.port,
         host: config.logstash.host,
         appName: config.logstash.appName,
+        mode: 'udp4',
         level: 'info',
         json: true,
         logstash: true,
@@ -94,10 +95,12 @@ class Logger {
 
     // Add logstash logging for SQL Logger when it has an included configuration
     if (config.logstashSQL) {
-      this.sqlOptions.transports.push(new LogstashUDP({
+      this.sqlOptions.transports.push(new LogstashTransport({
         port: config.logstashSQL.port,
         host: config.logstashSQL.host,
         appName: config.logstashSQL.appName,
+        mode: 'tcp4',
+        trailingLineFeed: true,
         level: 'debug',
         json: true,
         logstash: true,
@@ -107,10 +110,12 @@ class Logger {
 
     // Add logstash logging for SQL Logger when it has an included configuration
     if (config.logstashRequests) {
-      this.requestOptions.transports.push(new LogstashUDP({
+      this.requestOptions.transports.push(new LogstashTransport({
         port: config.logstashRequests.port,
         host: config.logstashRequests.host,
         appName: config.logstashRequests.appName,
+        mode: 'tcp4',
+        trailingLineFeed: true,
         level: 'debug',
         json: true,
         logstash: true,
