@@ -20,7 +20,8 @@ class Logger {
     config = config || {};
     const defaultLogging = {
       logDir: './logs',
-      options: {}
+      options: {},
+      verbose: false
     };
     this.loggingConfig = __.assign({}, defaultLogging, config.logging || {});
     this.logDir = this.loggingConfig .logDir || './logs';
@@ -39,9 +40,11 @@ class Logger {
     });
 
     // Optimization -- Add console logging and debug file if not in production
-    if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+    const env = process.env.NODE_ENV;
+    if (env !== 'production' && env !== 'test') {
+      const lvl = (this.loggingConfig.verbose) ? 'silly' : 'debug';
       transports.push(new winston.transports.Console({
-        level: 'debug',
+        level: lvl,
         format: format.printf(this.formatter)
       }));
       transports.push(new winston.transports.File({
