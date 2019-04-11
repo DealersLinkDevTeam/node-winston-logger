@@ -6,6 +6,7 @@ const __ = require('@dealerslink/lodash-extended');
 const winston = require('winston');
 const { format } = winston;
 const LogstashTransport = require('./lib/logstashTransport');
+const util = require('util');
 
 /**
  * A utility class to wrap Winston logging
@@ -202,7 +203,13 @@ class Logger {
     out['@message'] = message;
     out['@timestamp'] = new Date().toISOString();
     out['@fields'] = options;
-    return JSON.stringify(out);
+    let oustr;
+    try {
+      outstr = JSON.strinify(out);
+    } catch {
+      outstr = util.inspect(out, { depth: null });
+    }
+    return outstr;
   }
 
   handleError(err) {
