@@ -1,6 +1,6 @@
 {
   "name": "@dealerslink/node-winston-logger",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "A wrapper for npm module Winston",
   "main": "index.js",
   "scripts": {
